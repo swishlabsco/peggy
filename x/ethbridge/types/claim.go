@@ -11,6 +11,8 @@ import (
 )
 
 type EthBridgeClaim struct {
+	Chain            string          `json:"chain"`
+	Contract         EthereumAddress `json:"contract_address"`
 	Nonce            int             `json:"nonce"`
 	EthereumSender   EthereumAddress `json:"ethereum_sender"`
 	CosmosReceiver   sdk.AccAddress  `json:"cosmos_receiver"`
@@ -19,8 +21,10 @@ type EthBridgeClaim struct {
 }
 
 // NewEthBridgeClaim is a constructor function for NewEthBridgeClaim
-func NewEthBridgeClaim(nonce int, ethereumSender EthereumAddress, cosmosReceiver sdk.AccAddress, validator sdk.ValAddress, amount sdk.Coins) EthBridgeClaim {
+func NewEthBridgeClaim(chain string, contract EthereumAddress, nonce int, ethereumSender EthereumAddress, cosmosReceiver sdk.AccAddress, validator sdk.ValAddress, amount sdk.Coins) EthBridgeClaim {
 	return EthBridgeClaim{
+		Chain:            chain,
+		Contract:         contract,
 		Nonce:            nonce,
 		EthereumSender:   ethereumSender,
 		CosmosReceiver:   cosmosReceiver,
@@ -60,13 +64,15 @@ func CreateOracleClaimFromEthClaim(cdc *codec.Codec, ethClaim EthBridgeClaim) (o
 }
 
 // CreateEthClaimFromOracleString converts a string from any generic claim from the oracle module into an ethereum bridge specific claim.
-func CreateEthClaimFromOracleString(nonce int, ethereumAddress EthereumAddress, validator sdk.ValAddress, oracleClaimString string) (EthBridgeClaim, sdk.Error) {
+func CreateEthClaimFromOracleString(chain string, contract EthereumAddress, nonce int, ethereumAddress EthereumAddress, validator sdk.ValAddress, oracleClaimString string) (EthBridgeClaim, sdk.Error) {
 	oracleClaim, err := CreateOracleClaimFromOracleString(oracleClaimString)
 	if err != nil {
 		return EthBridgeClaim{}, err
 	}
 
 	return NewEthBridgeClaim(
+		chain,
+		contract,
 		nonce,
 		ethereumAddress,
 		oracleClaim.CosmosReceiver,

@@ -36,6 +36,9 @@ func (msg MsgCreateEthBridgeClaim) ValidateBasic() sdk.Error {
 	if !gethCommon.IsHexAddress(msg.EthereumSender.String()) {
 		return ErrInvalidEthAddress(DefaultCodespace)
 	}
+	if !gethCommon.IsHexAddress(msg.Contract.String()) {
+		return ErrInvalidEthAddress(DefaultCodespace)
+	}
 	return nil
 }
 
