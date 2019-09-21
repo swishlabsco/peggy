@@ -95,6 +95,9 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
+
+		chainID := vars[ChainId]
+
 		nonce := vars[restNonce]
 
 		nonceString, err := strconv.Atoi(nonce)
@@ -104,7 +107,7 @@ func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute 
 		}
 		ethereumSender := types.NewEthereumAddress(vars[restEthereumSender])
 
-		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(nonceString, ethereumSender))
+		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(chainID, nonceString, ethereumSender))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
