@@ -31,14 +31,16 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 }
 
 type createEthClaimReq struct {
-	BaseReq        rest.BaseReq `json:"base_req"`
-	Nonce          int          `json:"nonce"`
-	Chain          int          `json:"chain"`
-	Contract       int          `json:"contract_address"`
-	EthereumSender string       `json:"ethereum_sender"`
-	CosmosReceiver string       `json:"cosmos_receiver"`
-	Validator      string       `json:"validator"`
-	Amount         string       `json:"amount"`
+	BaseReq               rest.BaseReq `json:"base_req"`
+	ChainID               string       `json:"chain_id"`
+	BridgeContractAddress string       `json:"bridge_contract_address"`
+	Nonce                 int          `json:"nonce"`
+	Symbol                string       `json:"symbol"`
+	TokenContractAddress  string       `json:"token_contract_address"`
+	EthereumSender        string       `json:"ethereum_sender"`
+	CosmosReceiver        string       `json:"cosmos_receiver"`
+	Validator             string       `json:"validator"`
+	Amount                string       `json:"amount"`
 }
 
 func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -55,7 +57,8 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 			return
 		}
 
-		contractAddress := types.NewEthereumAddress(req.Contract)
+		bridgeContractAddress := types.NewEthereumAddress(req.BridgeContractAddress)
+		tokenContractAddress := types.NewEthereumAddress(req.TokenContractAddress)
 
 		ethereumSender := types.NewEthereumAddress(req.EthereumSender)
 
@@ -77,7 +80,7 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		}
 
 		// create the message
-		ethBridgeClaim := types.NewEthBridgeClaim(req.Chain, contractAddress, req.Nonce, ethereumSender, cosmosReceiver, validator, amount)
+		ethBridgeClaim := types.NewEthBridgeClaim(req.ChainID, bridgeContractAddress, req.Nonce, req.Symbol, tokenContractAddress, ethereumSender, cosmosReceiver, validator, amount)
 		msg := ethbridge.NewMsgCreateEthBridgeClaim(ethBridgeClaim)
 		err = msg.ValidateBasic()
 		if err != nil {
