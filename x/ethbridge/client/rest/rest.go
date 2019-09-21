@@ -20,6 +20,7 @@ import (
 )
 
 const (
+	testChainID        = "chainID"
 	restNonce          = "nonce"
 	restEthereumSender = "ethereumSender"
 )
@@ -27,7 +28,7 @@ const (
 // RegisterRoutes - Central function to define routes that get registered by the main application
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, queryRoute string) {
 	r.HandleFunc(fmt.Sprintf("/%s/prophecies", queryRoute), createClaimHandler(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/%s/prophecies/{%s}/{%s}", queryRoute, restNonce, restEthereumSender), getProphecyHandler(cdc, cliCtx, queryRoute)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/prophecies/{%s}/{%s}", queryRoute, testChainID, restNonce, restEthereumSender), getProphecyHandler(cdc, cliCtx, queryRoute)).Methods("GET")
 }
 
 type createEthClaimReq struct {
@@ -95,7 +96,6 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-
 		chainID := vars[ChainId]
 
 		nonce := vars[restNonce]
