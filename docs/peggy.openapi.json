@@ -1,0 +1,319 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "peggy",
+    "description": "Facilitates interaction with Peggy, a bridge between blockchains.",
+    "contact": {},
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:26657",
+      "variables": {}
+    },
+    {
+      "url": "http://localhost:1317",
+      "variables": {}
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["General"],
+        "summary": "node: get endpoints",
+        "description": "Returns endpoints",
+        "operationId": "Node:GetEndpoints",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:26657",
+            "variables": {}
+          }
+        ]
+      },
+      "post": {
+        "tags": ["General"],
+        "summary": "node: get status",
+        "description": "Returns current status",
+        "operationId": "Node:GetStatus",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/node%3Agetstatusrequest"
+              },
+              "example": {
+                "method": "status",
+                "jsonrpc": "2.0",
+                "params": [],
+                "id": "testing"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:26657",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/node_info": {
+      "get": {
+        "tags": ["General"],
+        "summary": "cli: version",
+        "description": "Returns current version",
+        "operationId": "Cli:Version",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:1317",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/auth/accounts/cosmos19l0hyjpzm8xkwlu84my4f0npd2ranxt2yfztux": {
+      "get": {
+        "tags": ["Account"],
+        "summary": "cli: get account",
+        "description": "Get information on an account",
+        "operationId": "Cli:GetAccount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:1317",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/bank/balances/cosmos1pjtgu0vau2m52nrykdpztrt887aykue0hq7dfh": {
+      "get": {
+        "tags": ["Account"],
+        "summary": "cli: get account balances",
+        "description": "Return token balances of an account",
+        "operationId": "Cli:GetAccountBalances",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:1317",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ethbridge/prophecies": {
+      "post": {
+        "tags": ["Prophecy"],
+        "summary": "cli: create eth prophecy",
+        "description": "Create a prophecy via the oracle",
+        "operationId": "Cli:CreateEthProphecy",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cli%3Acreateethprophecyrequest"
+              },
+              "example": {
+                "base_req": {
+                  "chain_id": "testing",
+                  "from": "cosmos18hf69vxn8a3tkladruxgxgv8tl8sl54gygdh29"
+                },
+                "nonce": "0",
+                "ethereum_sender": "0x7B95B6EC7EbD73572298cEf32Bb54FA408207359",
+                "amount": "4eth",
+                "cosmos_receiver": "cosmos1l5h2x255pvdy9l4z0hf9tr8zw7k657s97wyz7y",
+                "validator": "cosmosvaloper1xu7qk6axf39wp6g2ncv3mwps6z4cc9f8kkddmm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:1317",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ethbridge/prophecies/0/0x7B95B6EC7EbD73572298cEf32Bb54FA408207359": {
+      "get": {
+        "tags": ["Prophecy"],
+        "summary": "cli: get prophecy",
+        "description": "Get information on a specific prophecy",
+        "operationId": "Cli:GetProphecy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://localhost:1317",
+            "variables": {}
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "node:getstatusrequest": {
+        "title": "node:getstatusrequest",
+        "required": ["method", "jsonrpc", "params", "id"],
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "jsonrpc": {
+            "type": "string"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "method": "status",
+          "jsonrpc": "2.0",
+          "params": [],
+          "id": "dontcare"
+        }
+      },
+      "cli:createethprophecyrequest": {
+        "title": "cli:createethprophecyrequest",
+        "required": [
+          "base_req",
+          "nonce",
+          "ethereum_sender",
+          "amount",
+          "cosmos_receiver",
+          "validator"
+        ],
+        "type": "object",
+        "properties": {
+          "base_req": {
+            "$ref": "#/components/schemas/BaseReq"
+          },
+          "nonce": {
+            "type": "string"
+          },
+          "ethereum_sender": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "cosmos_receiver": {
+            "type": "string"
+          },
+          "validator": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "base_req": {
+            "chain_id": "testing",
+            "from": "cosmos18hf69vxn8a3tkladruxgxgv8tl8sl54gygdh29"
+          },
+          "nonce": "0",
+          "ethereum_sender": "0x7B95B6EC7EbD73572298cEf32Bb54FA408207359",
+          "amount": "4eth",
+          "cosmos_receiver": "cosmos1l5h2x255pvdy9l4z0hf9tr8zw7k657s97wyz7y",
+          "validator": "cosmosvaloper1xu7qk6axf39wp6g2ncv3mwps6z4cc9f8kkddmm"
+        }
+      },
+      "BaseReq": {
+        "title": "BaseReq",
+        "required": ["chain_id", "from"],
+        "type": "object",
+        "properties": {
+          "chain_id": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "chain_id": "testing",
+          "from": "cosmos18hf69vxn8a3tkladruxgxgv8tl8sl54gygdh29"
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "General",
+      "description": "Basic information about the node and cli."
+    },
+    {
+      "name": "Account",
+      "description": "Related to accounts (addresses) on the Bridge blockchain."
+    },
+    {
+      "name": "Prophecy",
+      "description": "Related to prophecies about transactional history that have occured on other blockchains."
+    }
+  ]
+}
