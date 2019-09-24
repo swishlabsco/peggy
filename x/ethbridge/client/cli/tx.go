@@ -1,9 +1,7 @@
 package cli
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
@@ -30,9 +28,9 @@ func GetCmdCreateEthBridgeClaim(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			chainID = args[0]
-			if strings.TrimSpace(chainID) == "" {
-				return fmt.Errorf("Must specify 'chain-id'")
+			chainID, err := strconv.Atoi(args[0])
+			if err != nil {
+				return err
 			}
 
 			nonce, err := strconv.Atoi(args[1])
@@ -57,7 +55,7 @@ func GetCmdCreateEthBridgeClaim(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			ethBridgeClaim := types.NewEthBridgeClaim(chainID, nonce, ethereumSender, cosmosReceiver, validator, amount)
+			ethBridgeClaim := types.NewEthBridgeClaim(chainID, ethereumSender, nonce, "eth", ethereumSender, ethereumSender, cosmosReceiver, validator, amount)
 			msg := types.NewMsgCreateEthBridgeClaim(ethBridgeClaim)
 
 			cliCtx.PrintResponse = true

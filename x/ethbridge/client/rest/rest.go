@@ -33,7 +33,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 
 type createEthClaimReq struct {
 	BaseReq               rest.BaseReq `json:"base_req"`
-	ChainID               string       `json:"chain_id"`
+	ChainID               int          `json:"chain_id"`
 	BridgeContractAddress string       `json:"bridge_contract_address"`
 	Nonce                 int          `json:"nonce"`
 	Symbol                string       `json:"symbol"`
@@ -96,7 +96,14 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		chainID := vars[ChainId]
+
+		chainID := vars[testChainID]
+
+		chainIDString, err := strconv.Atoi(chainID)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 
 		nonce := vars[restNonce]
 
@@ -107,7 +114,7 @@ func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute 
 		}
 		ethereumSender := types.NewEthereumAddress(vars[restEthereumSender])
 
-		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(chainID, nonceString, ethereumSender))
+		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(chainIDString, nonceString, ethereumSender))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
