@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/rest"
@@ -20,15 +21,18 @@ import (
 )
 
 const (
-	testChainID        = "chainID"
+	restChainID        = "chainID"
+	restBridgeContract = "bridgeContract"
 	restNonce          = "nonce"
+	restSymbol         = "symbol"
+	restTokenContract  = "tokenContract"
 	restEthereumSender = "ethereumSender"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, queryRoute string) {
 	r.HandleFunc(fmt.Sprintf("/%s/prophecies", queryRoute), createClaimHandler(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/%s/prophecies/{%s}/{%s}", queryRoute, testChainID, restNonce, restEthereumSender), getProphecyHandler(cdc, cliCtx, queryRoute)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/prophecies/{%s}/{%s}/{%s}/{%s}/{%s}/{%s}", queryRoute, restChainID, restBridgeContract, restNonce, restSymbol, restTokenContract, restEthereumSender), getProphecyHandler(cdc, cliCtx, queryRoute)).Methods("GET")
 }
 
 type createEthClaimReq struct {
@@ -59,6 +63,7 @@ func createClaimHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		}
 
 		bridgeContractAddress := types.NewEthereumAddress(req.BridgeContractAddress)
+
 		tokenContractAddress := types.NewEthereumAddress(req.TokenContractAddress)
 
 		ethereumSender := types.NewEthereumAddress(req.EthereumSender)
@@ -97,24 +102,33 @@ func getProphecyHandler(cdc *codec.Codec, cliCtx context.CLIContext, queryRoute 
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
-		chainID := vars[testChainID]
-
+		chainID := vars[restChainID]
 		chainIDString, err := strconv.Atoi(chainID)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		nonce := vars[restNonce]
+		bridgeContract := types.NewEthereumAddress(vars[restBridgeContract])
 
+		nonce := vars[restNonce]
 		nonceString, err := strconv.Atoi(nonce)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+
+		tokenContract := types.NewEthereumAddress(vars[restTokenContract])
+
+		symbol := vars[restSymbol]
+		if strings.TrimSpace(symbol) == "" {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		ethereumSender := types.NewEthereumAddress(vars[restEthereumSender])
 
-		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(chainIDString, nonceString, ethereumSender))
+		bz, err := cdc.MarshalJSON(ethbridge.NewQueryEthProphecyParams(chainIDString, bridgeContract, nonceString, symbol, tokenContract, ethereumSender))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
