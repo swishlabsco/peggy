@@ -13,3 +13,7 @@ build
 # IDE
 .idea/
 *.iml
+
+# Node modules
+node_modules/ 
+
