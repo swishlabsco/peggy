@@ -175,9 +175,6 @@ yarn develop
 # Deploy contract to local blockchain
 yarn migrate
 
-# Copy contract ABI to go modules:
-yarn peggy:abi
-
 # Get contract's address
 yarn peggy:address
 ```
@@ -200,11 +197,12 @@ For automated relaying, there is a relayer service that can be run that will aut
 # Check ebrelayer connection to ebd
 ebrelayer status
 
-# Start ebrelayer on the contract's deployed address with [LOCAL_WEB_SOCKET] and [REGISTRY_DEPLOYED_ADDRESS]
-# Example [LOCAL_WEB_SOCKET]: ws://127.0.0.1:7545/
-# Example [REGISTRY_DEPLOYED_ADDRESS]: 0xC4cE93a5699c68241fc2fB503Fb0f21724A624BB
+# Generate required contract ABIs and bindings
+ebrelayer generate
 
-ebrelayer init ethereum [LOCAL_WEB_SOCKET] [REGISTRY_DEPLOYED_ADDRESS] validator --chain-id=peggy
+# Start ebrelayer on the contract's deployed address
+# Example: ebrelayer init ethereum [LOCAL_WEB_SOCKET] [REGISTRY_DEPLOYED_ADDRESS] validator --chain-id=peggy
+ebrelayer init ethereum ws://127.0.0.1:7545/ 0xC4cE93a5699c68241fc2fB503Fb0f21724A624BB validator --chain-id=peggy
 
 # Enter password and press enter
 # You should see a message like: Started ethereum websocket with provider: [LOCAL_WEB_SOCKET] \ Subscribed to contract events on address: [PEGGY_DEPLOYED_ADDRESS]
@@ -265,7 +263,7 @@ yarn migrate --network ropsten
 yarn peggy:address --network ropsten
 
 # Make sure to start ebrelayer with Ropsten network websocket
-ebrelayer init wss://ropsten.infura.io/ [PEGGY_DEPLOYED_ADDRESS] LogLock\(bytes32,address,bytes,address,string,uint256,uint256\) validator --chain-id=peggy
+ebrelayer init wss://ropsten.infura.io/ [PEGGY_DEPLOYED_ADDRESS] validator --chain-id=peggy
 
 # Send lock transaction on Ropsten testnet
 
