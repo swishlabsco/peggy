@@ -12,8 +12,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/cosmos/peggy/cmd/ebrelayer/events"
-	cosmosBridge "github.com/cosmos/peggy/cmd/ebrelayer/generated/cosmosbridge"
-	oracle "github.com/cosmos/peggy/cmd/ebrelayer/generated/oracle"
+	cosmosBridge "github.com/cosmos/peggy/cmd/ebrelayer/generated/bindings/CosmosBridge"
+	oracle "github.com/cosmos/peggy/cmd/ebrelayer/generated/bindings/Oracle"
 )
 
 const (
