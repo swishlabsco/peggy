@@ -6,59 +6,111 @@ import (
 	"strings"
 )
 
-// StandardABIGenCmd : standard contract ABI generation command
-const StandardABIGenCmd = "solc " +
-	"--abi ./testnet-contracts/contracts/[DIRECTORY][CONTRACT].sol " +
-	"-o ./cmd/ebrelayer/generated/abi/[CONTRACT] " +
-	"--overwrite " +
-	"--allow-paths *,"
+const (
+	// _standardABIBINGenCmd : standard command for contract ABI and BIN generation
+	_standardABIBINGenCmd = "solc " +
+		"--[SOLC_CMD] ./testnet-contracts/contracts/[DIRECTORY][CONTRACT].sol " +
+		"-o ./cmd/ebrelayer/generated/[SOLC_CMD]/[CONTRACT] " +
+		"--overwrite " +
+		"--allow-paths *,"
+	// _standardBindingGenCmd : standard command for contract binding generation
+	_standardBindingGenCmd = "abigen " +
+		"--bin ./cmd/ebrelayer/generated/bin/[CONTRACT]/[CONTRACT].bin " +
+		"--abi ./cmd/ebrelayer/generated/abi/[CONTRACT]/[CONTRACT].abi " +
+		"--pkg [CONTRACT] " +
+		"--type [CONTRACT] " +
+		"--out ./cmd/ebrelayer/generated/bindings/[CONTRACT]/[CONTRACT].go"
+)
 
-// StandardBindingGenCmd : standard contract binding generation command
-const StandardBindingGenCmd = "abigen " +
-	"--abi ./cmd/ebrelayer/generated/abi/[CONTRACT]/[CONTRACT].abi " +
-	"--pkg [CONTRACT] " +
-	"--type [CONTRACT] " +
-	"--out ./cmd/ebrelayer/generated/bindings/[CONTRACT]/[CONTRACT].go"
+const (
+	_solcCmd   = "[SOLC_CMD]"
+	_directory = "[DIRECTORY]"
+	_contract  = "[CONTRACT]"
+)
 
-// GenerateContractABIs : generates ABI for the named contracts
-func GenerateContractABIs(bridgeContracts []string) error {
-	for i := 0; i < len(bridgeContracts); i++ {
-		// Set up directory replacement text
-		var directoryReplacementText string
-		if bridgeContracts[i] == "BridgeBank" {
-			directoryReplacementText = bridgeContracts[i] + "/"
-		} else {
-			directoryReplacementText = ""
+// CompileContracts : compiles named contracts and generates ABI, BIN
+func CompileContracts(contracts []Type) error {
+	for _, contract := range contracts {
+		// Validate contract name
+		err := contract.IsValid()
+		if err != nil {
+			return err
 		}
-		// Populate the contract abi's directory field
-		standardABIGenCmd := strings.Replace(StandardABIGenCmd, "[DIRECTORY]", directoryReplacementText, -1)
-		// Populate contract name into cmd
-		abiGenerationCmd := replaceContractName(standardABIGenCmd, bridgeContracts[i])
-		_, err := exec.Command("sh", "-c", abiGenerationCmd).Output()
+
+		err = compileContract(contract)
 		if err != nil {
 			return err
 		}
 	}
-	fmt.Println("Successfully generated contract ABIs.")
+	fmt.Println("Successfully generated all bins and abis.")
 	return nil
+}
+
+// compileContract : compiles a contract, generating both BIN and BIN files
+func compileContract(contract Type) error {
+	contractBINGenCmd, contractABIGenCmd := prepareContractABICmdBINCmd(contract)
+
+	// Generate Contract.bin file
+	err := execCmd(contractBINGenCmd)
+	if err != nil {
+		return err
+	}
+
+	// Generate Contract.abi file
+	return execCmd(contractABIGenCmd)
+}
+
+// prepareContractABICmdBINCmd : prepares the BIN and ABI generation cmds for a contract via text replacement
+func prepareContractABICmdBINCmd(contract Type) (string, string) {
+	// Replace directory with appropriate directory path
+	directoryReplacementText := ""
+	if contract == BridgeBank {
+		directoryReplacementText = contract.String() + "/"
+	}
+	directoryABIBINGenCmd := replaceText(_standardABIBINGenCmd, _directory, directoryReplacementText)
+
+	// Populate contract name
+	contractABIBINGenCmd := replaceText(directoryABIBINGenCmd, _contract, contract.String())
+
+	// Prepare BIN and ABI generation cmds
+	contractBINGenCmd := replaceText(contractABIBINGenCmd, _solcCmd, "bin")
+	contractABIGenCmd := replaceText(contractABIBINGenCmd, _solcCmd, "abi")
+
+	return contractBINGenCmd, contractABIGenCmd
 }
 
 // GenerateBindings : generates bindings for the named contracts
-func GenerateBindings(bridgeContracts []string) error {
-	for i := 0; i < len(bridgeContracts); i++ {
-		// Populate contract name into cmd
-		bindingGenerationCmd := replaceContractName(StandardBindingGenCmd, bridgeContracts[i])
-		// Execute cmd
-		_, err := exec.Command("sh", "-c", bindingGenerationCmd).Output()
+func GenerateBindings(contracts []Type) error {
+	for _, contract := range contracts {
+		// Validate contract name
+		err := contract.IsValid()
+		if err != nil {
+			return err
+		}
+
+		err = generateBinding(contract)
 		if err != nil {
 			return err
 		}
 	}
-	fmt.Println("Successfully generated contract bindings.")
+	fmt.Println("Successfully generated all bindings.")
 	return nil
 }
 
-// replaceContractName : replaces placeholder text "[CONTRACT]" with the contract's name
-func replaceContractName(cmd string, name string) string {
-	return strings.Replace(cmd, "[CONTRACT]", name, -1)
+// generateBinding : generates bindings for a single contract
+func generateBinding(contract Type) error {
+	bindingGenerationCmd := replaceText(_standardBindingGenCmd, _contract, contract.String())
+	// Generate Contract.go bindings file
+	return execCmd(bindingGenerationCmd)
+}
+
+// replaceText : replaces specific current text with new text
+func replaceText(cmd string, current string, new string) string {
+	return strings.Replace(cmd, current, new, -1)
+}
+
+// execCmd : executes the given cmd
+func execCmd(cmd string) error {
+	_, err := exec.Command("sh", "-c", cmd).Output()
+	return err
 }

@@ -256,12 +256,22 @@ func RunCosmosRelayerCmd(cmd *cobra.Command, args []string) error {
 
 // RunGenerateBindingsCmd : executes the generateBindingsCmd
 func RunGenerateBindingsCmd(cmd *cobra.Command, args []string) error {
-	// Set up the Bridge contract names
-	bridgeContractNames := []string{"BridgeRegistry", "Valset", "Oracle", "CosmosBridge", "BridgeBank"}
-	// Generate contract ABIs
-	contract.GenerateContractABIs(bridgeContractNames)
+	contracts := []contract.Type{
+		contract.BridgeRegistry,
+		contract.Valset,
+		contract.Oracle,
+		contract.CosmosBridge,
+		contract.BridgeBank,
+	}
+
+	// Compile contracts, generating contract bin and abi
+	err := contract.CompileContracts(contracts)
+	if err != nil {
+		return err
+	}
+
 	// Generate contract bindings
-	return contract.GenerateBindings(bridgeContractNames)
+	return contract.GenerateBindings(contracts)
 }
 
 func initConfig(cmd *cobra.Command) error {
