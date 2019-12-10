@@ -33,7 +33,6 @@
   "scripts": {
     "develop": "truffle develop",
     "migrate": "truffle migrate --reset",
-    "peggy:abi": "node scripts/formatAbi.js",
     "peggy:address": "truffle exec scripts/getBridgeRegistryAddress.js",
     "peggy:setup": "truffle exec scripts/setOracleAndBridgeBank.js",
     "peggy:lock": "truffle exec scripts/sendLockTx.js",

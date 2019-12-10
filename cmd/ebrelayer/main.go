@@ -28,11 +28,13 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	app "github.com/cosmos/peggy/app"
+	contract "github.com/cosmos/peggy/cmd/ebrelayer/contract"
 	relayer "github.com/cosmos/peggy/cmd/ebrelayer/relayer"
 )
 
 var appCodec *amino.Codec
 
+// FlagRPCURL : flag for the RPC URL of the tendermint node
 const FlagRPCURL = "rpc-url"
 
 // FlagMakeClaims : optional flag for the ethereum relayer to automatically make OracleClaims upon every ProphecyClaim
@@ -72,6 +74,7 @@ func init() {
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
 		initCmd,
+		generateBindingsCmd(),
 	)
 
 	executor := cli.PrepareMainCmd(rootCmd, "EBRELAYER", DefaultCLIHome)
@@ -100,10 +103,9 @@ var initCmd = &cobra.Command{
 //
 func ethereumRelayerCmd() *cobra.Command {
 	ethereumRelayerCmd := &cobra.Command{
-		Use:   "ethereum [web3Provider] [bridgeContractAddress] [validatorFromName] --make-claims [make-claims] --chain-id [chain-id]",
-		Short: "Initializes a web socket which streams live events from a smart contract and relays them to the Cosmos network",
-		Args:  cobra.ExactArgs(3),
-		// NOTE: Preface both parentheses in the event signature with a '\'
+		Use:     "ethereum [web3Provider] [bridgeContractAddress] [validatorFromName] --make-claims [make-claims] --chain-id [chain-id]",
+		Short:   "Initializes a web socket which streams live events from a smart contract and relays them to the Cosmos network",
+		Args:    cobra.ExactArgs(3),
 		Example: "ebrelayer init ethereum wss://ropsten.infura.io/ws 05d9758cb6b9d9761ecb8b2b48be7873efae15c0 validator --make-claims=false --chain-id=testing",
 		RunE:    RunEthereumRelayerCmd,
 	}
@@ -125,6 +127,19 @@ func cosmosRelayerCmd() *cobra.Command {
 	}
 
 	return cosmosRelayerCmd
+}
+
+//	generateBindingsCmd : Generates ABIs and bindings for Bridge smart contracts which facilitate contract interaction
+func generateBindingsCmd() *cobra.Command {
+	generateBindingsCmd := &cobra.Command{
+		Use:     "generate",
+		Short:   "Generates Bridge smart contracts ABIs and bindings",
+		Args:    cobra.ExactArgs(0),
+		Example: "generate",
+		RunE:    RunGenerateBindingsCmd,
+	}
+
+	return generateBindingsCmd
 }
 
 // RunEthereumRelayerCmd executes the initEthereumRelayerCmd with the provided parameters
@@ -237,6 +252,26 @@ func RunCosmosRelayerCmd(cmd *cobra.Command, args []string) error {
 		contractAddress,
 		privateKey,
 	)
+}
+
+// RunGenerateBindingsCmd : executes the generateBindingsCmd
+func RunGenerateBindingsCmd(cmd *cobra.Command, args []string) error {
+	contracts := []contract.Type{
+		contract.BridgeRegistry,
+		contract.Valset,
+		contract.Oracle,
+		contract.CosmosBridge,
+		contract.BridgeBank,
+	}
+
+	// Compile contracts, generating contract bin and abi
+	err := contract.CompileContracts(contracts)
+	if err != nil {
+		return err
+	}
+
+	// Generate contract bindings
+	return contract.GenerateBindings(contracts)
 }
 
 func initConfig(cmd *cobra.Command) error {
